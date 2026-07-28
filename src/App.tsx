@@ -206,11 +206,20 @@ export default function App() {
 
   // Admin participant deletion
   const handleDeleteParticipant = async (participantId: string) => {
+    // 1. Optimistically update local React state immediately
+    setParticipants((prev) => prev.filter((p) => p.id !== participantId));
+    setWeekendVotes((prev) => prev.filter((v) => v.participantId !== participantId));
+    setDateAvailabilities((prev) => prev.filter((a) => a.participantId !== participantId));
+
+    if (currentParticipant?.id === participantId) {
+      setCurrentParticipant(null);
+      localStorage.removeItem('dispo_rando_participant');
+    }
+
     try {
-      // Delete main participant document
+      // 2. Perform Firestore document deletions in background
       await deleteParticipantFromDb(participantId);
       
-      // Delete all associated weekend votes and date availabilities in parallel
       const pVotes = weekendVotes.filter((v) => v.participantId === participantId);
       const voteDeletions = pVotes.map((v) => deleteDocByIdInDb('weekendVotes', v.id));
 
@@ -218,15 +227,8 @@ export default function App() {
       const availDeletions = pAvails.map((a) => deleteDocByIdInDb('availabilities', a.id));
 
       await Promise.all([...voteDeletions, ...availDeletions]);
-
-      // Reset local current participant if it's the deleted user
-      if (currentParticipant?.id === participantId) {
-        setCurrentParticipant(null);
-        localStorage.removeItem('dispo_rando_participant');
-      }
     } catch (err) {
       console.error("Error in handleDeleteParticipant:", err);
-      throw err;
     }
   };
 

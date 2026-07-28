@@ -49,12 +49,18 @@ export const saveParticipantInDb = async (participant: Participant) => {
 };
 
 export const deleteParticipantFromDb = async (participantId: string) => {
-  const ref = doc(db, COLLECTIONS.PARTICIPANTS, participantId);
-  await deleteDoc(ref);
+  try {
+    await initAuth();
+    const ref = doc(db, COLLECTIONS.PARTICIPANTS, participantId);
+    await deleteDoc(ref);
+  } catch (err) {
+    console.error("Error deleting participant from Firestore:", err);
+  }
 };
 
 export const deleteDocByIdInDb = async (collectionName: string, docId: string) => {
   try {
+    await initAuth();
     const ref = doc(db, collectionName, docId);
     await deleteDoc(ref);
   } catch (err) {

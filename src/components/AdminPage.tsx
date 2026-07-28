@@ -102,10 +102,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     if (!confirmDeleteParticipant) return;
     const p = confirmDeleteParticipant;
     setDeletingId(p.id);
+    setConfirmDeleteParticipant(null); // Close dialog immediately
+    setToastMessage(`Suppression de ${p.name} en cours...`);
+
     try {
       await onDeleteParticipant(p.id);
-      setToastMessage(`Le participant ${p.name} a été supprimé.`);
-      setConfirmDeleteParticipant(null);
+      setToastMessage(`Le participant ${p.name} a été supprimé avec succès.`);
     } catch (err) {
       console.error("Erreur lors de la suppression:", err);
       setError("Une erreur est survenue lors de la suppression.");
