@@ -87,7 +87,6 @@ export default function App() {
             id: uid || parsed.id || 'p_' + Date.now(),
           };
           setCurrentParticipant(participantData);
-          saveParticipantInDb(participantData);
         } catch (e) {
           console.error("Failed parsing stored participant:", e);
         }
@@ -99,6 +98,19 @@ export default function App() {
 
     const unsubParticipants = subscribeParticipants((list) => {
       setParticipants(list);
+      // Auto-clear local participant if deleted from database
+      const stored = localStorage.getItem('dispo_rando_participant');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as Participant;
+          if (!list.some((p) => p.id === parsed.id)) {
+            setCurrentParticipant(null);
+            localStorage.removeItem('dispo_rando_participant');
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
     });
 
     const unsubWeekendVotes = subscribeWeekendVotes((votes) => {
