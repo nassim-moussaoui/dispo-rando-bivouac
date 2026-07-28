@@ -58,10 +58,24 @@ export default function App() {
     setCurrentPath(path);
   };
 
-  // Initialize Firebase Auth & Load stored local participant
+  // Initialize Firebase Auth & Load stored local participant or URL user magic link
   useEffect(() => {
     const setup = async () => {
       const uid = await initAuth();
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlUserId = urlParams.get('user') || urlParams.get('u');
+
+      if (urlUserId) {
+        // Recover profile from URL parameter
+        const found = participants.find((p) => p.id === urlUserId);
+        if (found) {
+          setCurrentParticipant(found);
+          localStorage.setItem('dispo_rando_participant', JSON.stringify(found));
+          window.history.replaceState({}, '', window.location.pathname);
+          return;
+        }
+      }
+
       const stored = localStorage.getItem('dispo_rando_participant');
       if (stored) {
         try {
@@ -103,7 +117,13 @@ export default function App() {
       unsubAvailabilities();
       unsubTripDetails();
     };
-  }, []);
+  }, [participants]);
+
+  const handleSelectExistingParticipant = (participant: Participant) => {
+    setCurrentParticipant(participant);
+    localStorage.setItem('dispo_rando_participant', JSON.stringify(participant));
+    saveParticipantInDb(participant);
+  };
 
   const handleSaveParticipant = async (
     name: string,
@@ -317,7 +337,9 @@ export default function App() {
         isOpen={isUserModalOpen}
         onClose={() => setIsUserModalOpen(false)}
         currentParticipant={currentParticipant}
+        participants={participants}
         onSaveParticipant={handleSaveParticipant}
+        onSelectExistingParticipant={handleSelectExistingParticipant}
       />
 
       <ShareModal
