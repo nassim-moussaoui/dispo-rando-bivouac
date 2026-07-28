@@ -5,6 +5,8 @@ export interface Participant {
   name: string;
   avatarColor: string;
   avatarEmoji?: string;
+  pinHash?: string;
+  pinResetRequired?: boolean;
   createdAt: string;
   updatedAt?: string;
 }

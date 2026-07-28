@@ -20,6 +20,7 @@ interface AdminPageProps {
   weekendVotes: WeekendVote[];
   dateAvailabilities: DateAvailability[];
   onDeleteParticipant: (participantId: string) => Promise<void>;
+  onResetParticipantPin: (participantId: string) => Promise<void>;
   onNavigateHome: () => void;
 }
 
@@ -39,6 +40,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   weekendVotes,
   dateAvailabilities,
   onDeleteParticipant,
+  onResetParticipantPin,
   onNavigateHome,
 }) => {
   const [passwordInput, setPasswordInput] = useState('');
@@ -48,8 +50,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resettingPinId, setResettingPinId] = useState<string | null>(null);
   const [confirmDeleteParticipant, setConfirmDeleteParticipant] = useState<Participant | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const handleResetPin = async (p: Participant) => {
+    setResettingPinId(p.id);
+    try {
+      await onResetParticipantPin(p.id);
+      setToastMessage(`Le code PIN de ${p.name} a été réinitialisé.`);
+    } catch (err) {
+      console.error("Erreur lors de la réinitialisation du PIN:", err);
+    } finally {
+      setResettingPinId(null);
+    }
+  };
 
   useEffect(() => {
     if (toastMessage) {
@@ -341,10 +356,20 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                                 {pVotesCount} vote(s)
                               </span>
                             </td>
-                            <td className="px-5 py-3.5 text-right">
+                            <td className="px-5 py-3.5 text-right flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleResetPin(p)}
+                                disabled={resettingPinId === p.id}
+                                className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer"
+                                title="Réinitialiser le code PIN secret de ce membre"
+                              >
+                                <KeyRound className="w-3.5 h-3.5" />
+                                <span>{resettingPinId === p.id ? 'Reset...' : 'Reset PIN'}</span>
+                              </button>
+
                               <button
                                 onClick={() => setConfirmDeleteParticipant(p)}
-                                className="px-3.5 py-1.5 bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ml-auto cursor-pointer"
+                                className="px-3.5 py-1.5 bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                                 <span>Supprimer</span>

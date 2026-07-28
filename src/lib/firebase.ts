@@ -53,6 +53,15 @@ export const deleteParticipantFromDb = async (participantId: string) => {
   await deleteDoc(ref);
 };
 
+export const resetParticipantPinInDb = async (participantId: string) => {
+  const ref = doc(db, COLLECTIONS.PARTICIPANTS, participantId);
+  await setDoc(ref, {
+    pinResetRequired: true,
+    pinHash: '',
+    updatedAt: new Date().toISOString()
+  }, { merge: true });
+};
+
 export const subscribeParticipants = (callback: (participants: Participant[]) => void) => {
   const colRef = collection(db, COLLECTIONS.PARTICIPANTS);
   return onSnapshot(colRef, (snapshot) => {

@@ -14,6 +14,7 @@ import {
   subscribeTripDetails, 
   saveParticipantInDb, 
   deleteParticipantFromDb,
+  resetParticipantPinInDb,
   saveWeekendVoteInDb, 
   deleteWeekendVoteInDb,
   saveDateAvailabilityInDb, 
@@ -128,7 +129,9 @@ export default function App() {
   const handleSaveParticipant = async (
     name: string,
     emoji: string,
-    color: string
+    color: string,
+    pinHash?: string,
+    pinResetRequired?: boolean
   ) => {
     const id = currentParticipant?.id || 'p_' + Math.random().toString(36).substr(2, 9);
     const updated: Participant = {
@@ -136,6 +139,8 @@ export default function App() {
       name,
       avatarEmoji: emoji,
       avatarColor: color,
+      pinHash: pinHash ?? currentParticipant?.pinHash ?? '',
+      pinResetRequired: pinResetRequired ?? false,
       createdAt: currentParticipant?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -143,6 +148,10 @@ export default function App() {
     setCurrentParticipant(updated);
     localStorage.setItem('dispo_rando_participant', JSON.stringify(updated));
     await saveParticipantInDb(updated);
+  };
+
+  const handleResetParticipantPin = async (participantId: string) => {
+    await resetParticipantPinInDb(participantId);
   };
 
   // Vote for a weekend
@@ -231,6 +240,7 @@ export default function App() {
         weekendVotes={weekendVotes}
         dateAvailabilities={dateAvailabilities}
         onDeleteParticipant={handleDeleteParticipant}
+        onResetParticipantPin={handleResetParticipantPin}
         onNavigateHome={() => navigateTo('/')}
       />
     );
