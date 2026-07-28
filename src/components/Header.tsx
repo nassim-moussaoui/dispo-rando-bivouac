@@ -6,6 +6,7 @@ interface HeaderProps {
   currentParticipant: Participant | null;
   onOpenUserModal: () => void;
   onOpenShareModal: () => void;
+  onLogout?: () => void;
   participantCount: number;
 }
 
@@ -13,6 +14,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentParticipant,
   onOpenUserModal,
   onOpenShareModal,
+  onLogout,
   participantCount,
 }) => {
   const [copied, setCopied] = useState(false);
@@ -51,18 +53,30 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-wrap items-center gap-3">
             {/* Current user badge or create account CTA */}
             {currentParticipant ? (
-              <button
-                onClick={onOpenUserModal}
-                className="inline-flex items-center gap-2.5 p-1.5 pr-4 bg-emerald-100 hover:bg-emerald-200 border-2 border-emerald-300 text-emerald-900 font-black text-xs sm:text-sm rounded-full transition cursor-pointer"
-              >
-                <span className="w-8 h-8 rounded-full bg-white border-2 border-emerald-400 flex items-center justify-center text-base shadow-sm">
-                  {currentParticipant.avatarEmoji || '🎒'}
-                </span>
-                <div className="flex flex-col text-left">
-                  <span className="leading-none text-emerald-950 font-black">{currentParticipant.name}</span>
-                  <span className="text-[10px] font-bold text-emerald-700 underline mt-0.5">Pas vous ?</span>
-                </div>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onOpenUserModal}
+                  className="inline-flex items-center gap-2.5 p-1.5 pr-4 bg-emerald-100 hover:bg-emerald-200 border-2 border-emerald-300 text-emerald-900 font-black text-xs sm:text-sm rounded-full transition cursor-pointer"
+                >
+                  <span className="w-8 h-8 rounded-full bg-white border-2 border-emerald-400 flex items-center justify-center text-base shadow-sm">
+                    {currentParticipant.avatarEmoji || '🎒'}
+                  </span>
+                  <div className="flex flex-col text-left">
+                    <span className="leading-none text-emerald-950 font-black">{currentParticipant.name}</span>
+                    <span className="text-[10px] font-bold text-emerald-700 underline mt-0.5">Profil / PIN</span>
+                  </div>
+                </button>
+
+                {onLogout && (
+                  <button
+                    onClick={onLogout}
+                    className="px-3 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 border-2 border-slate-200 text-slate-600 text-xs font-black rounded-2xl transition cursor-pointer"
+                    title="Se déconnecter"
+                  >
+                    Se déconnecter
+                  </button>
+                )}
+              </div>
             ) : (
               <button
                 onClick={onOpenUserModal}

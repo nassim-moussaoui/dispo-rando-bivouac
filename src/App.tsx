@@ -225,6 +225,11 @@ export default function App() {
     }
   };
 
+  const handleLogout = () => {
+    setCurrentParticipant(null);
+    localStorage.removeItem('dispo_rando_participant');
+  };
+
   // Trip details update
   const handleSaveTripDetails = async (details: TripDetails) => {
     await saveTripDetailsInDb(details);
@@ -259,6 +264,7 @@ export default function App() {
         currentParticipant={currentParticipant}
         onOpenUserModal={() => setIsUserModalOpen(true)}
         onOpenShareModal={() => setIsShareModalOpen(true)}
+        onLogout={handleLogout}
         participantCount={participants.length}
       />
 
@@ -350,6 +356,7 @@ export default function App() {
         participants={participants}
         onSaveParticipant={handleSaveParticipant}
         onSelectExistingParticipant={handleSelectExistingParticipant}
+        onLogout={handleLogout}
       />
 
       <ShareModal
