@@ -1,0 +1,72 @@
+{
+  "entities": {
+    "participants": {
+      "title": "Participant",
+      "description": "Friends participating in the availability survey",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "avatarColor": { "type": "string" },
+        "gearNotes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "createdAt"]
+    },
+    "availabilities": {
+      "title": "Availability",
+      "description": "Availability records submitted by friends for specific dates or weekends",
+      "type": "object",
+      "properties": {
+        "participantId": { "type": "string" },
+        "participantName": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string", "enum": ["available", "maybe", "unavailable"] },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["participantId", "date", "status"]
+    },
+    "weekendVotes": {
+      "title": "Weekend Vote",
+      "description": "Votes on specific 2-day weekend slots",
+      "type": "object",
+      "properties": {
+        "participantId": { "type": "string" },
+        "participantName": { "type": "string" },
+        "weekendId": { "type": "string" },
+        "status": { "type": "string", "enum": ["available", "maybe", "unavailable"] },
+        "note": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["participantId", "weekendId", "status"]
+    },
+    "tripDetails": {
+      "title": "Trip Details",
+      "description": "Main metadata and suggestions for the bivouac trip",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "organizerName": { "type": "string" },
+        "description": { "type": "string" },
+        "suggestedLocations": { "type": "array", "items": { "type": "string" } },
+        "equipmentList": { "type": "array", "items": { "type": "string" } },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "messages": {
+      "title": "Message",
+      "description": "Group chat and comments regarding trip organization",
+      "type": "object",
+      "properties": {
+        "participantId": { "type": "string" },
+        "participantName": { "type": "string" },
+        "avatarColor": { "type": "string" },
+        "text": { "type": "string" },
+        "weekendId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["participantId", "participantName", "text", "createdAt"]
+    }
+  }
+}
