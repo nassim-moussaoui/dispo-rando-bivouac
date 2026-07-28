@@ -83,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs sm:text-sm rounded-2xl shadow-[0_4px_0_rgb(217,119,6)] active:shadow-none active:translate-y-1 transition-all cursor-pointer animate-pulse"
               >
                 <UserCheck className="w-4 h-4" />
-                <span>Indiquer ton prénom</span>
+                <span>Indiquer ton pseudo</span>
               </button>
             )}
 

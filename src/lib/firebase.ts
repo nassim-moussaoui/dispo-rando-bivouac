@@ -75,8 +75,12 @@ export const subscribeParticipants = (callback: (participants: Participant[]) =>
   const colRef = collection(db, COLLECTIONS.PARTICIPANTS);
   return onSnapshot(colRef, (snapshot) => {
     const list: Participant[] = [];
-    snapshot.forEach((doc) => {
-      list.push(doc.data() as Participant);
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data() as Participant;
+      list.push({
+        ...data,
+        id: docSnap.id
+      });
     });
     callback(list);
   }, (err) => {
@@ -105,8 +109,12 @@ export const subscribeWeekendVotes = (callback: (votes: WeekendVote[]) => void) 
   const colRef = collection(db, COLLECTIONS.WEEKEND_VOTES);
   return onSnapshot(colRef, (snapshot) => {
     const votes: WeekendVote[] = [];
-    snapshot.forEach((doc) => {
-      votes.push(doc.data() as WeekendVote);
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data() as WeekendVote;
+      votes.push({
+        ...data,
+        id: docSnap.id
+      });
     });
     callback(votes);
   }, (err) => {
@@ -135,8 +143,12 @@ export const subscribeDateAvailabilities = (callback: (availabilities: DateAvail
   const colRef = collection(db, COLLECTIONS.AVAILABILITIES);
   return onSnapshot(colRef, (snapshot) => {
     const list: DateAvailability[] = [];
-    snapshot.forEach((doc) => {
-      list.push(doc.data() as DateAvailability);
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data() as DateAvailability;
+      list.push({
+        ...data,
+        id: docSnap.id
+      });
     });
     callback(list);
   }, (err) => {

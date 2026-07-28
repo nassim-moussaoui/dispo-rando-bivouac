@@ -100,9 +100,19 @@ export const UserModal: React.FC<UserModalProps> = ({
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      setError('Veuillez indiquer votre prénom ou surnom.');
+      setError('Veuillez indiquer votre pseudo.');
       return;
     }
+
+    // Check duplicate pseudo (case-insensitive)
+    const isDuplicate = participants.some(
+      (p) => p.name.toLowerCase().trim() === trimmed.toLowerCase() && p.id !== currentParticipant?.id
+    );
+    if (isDuplicate) {
+      setError('Ce pseudo est déjà utilisé par un membre du groupe. Choisissez-en un autre ou retrouvez votre profil.');
+      return;
+    }
+
     setError('');
     if (currentParticipant) {
       // Editing existing connected participant: directly save if no PIN change needed
@@ -460,7 +470,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                 {/* Name Field */}
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
-                    Votre prénom ou surnom <span className="text-emerald-600">*</span>
+                    Votre pseudo <span className="text-emerald-600">*</span>
                   </label>
                   <input
                     type="text"
