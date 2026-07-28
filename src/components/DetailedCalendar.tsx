@@ -164,57 +164,7 @@ export const DetailedCalendar: React.FC<DetailedCalendarProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-100">
-              
-              {/* Highlight Weekends first */}
-              <tr className="bg-amber-100 text-amber-950 font-black uppercase tracking-wider text-[10px] border-y-2 border-amber-300">
-                <td colSpan={participants.length + 1} className="p-2.5 px-3">
-                  🌟 Synthèse rapide par Week-end
-                </td>
-              </tr>
-
-              {WEEKENDS_LIST.map((w) => (
-                <tr key={w.id} className="hover:bg-emerald-50/60 transition">
-                  <td className="p-3 sticky left-0 bg-white z-10 font-black text-emerald-950 border-r-2 border-emerald-100">
-                    <div>{w.title}</div>
-                    <div className="text-[10px] text-slate-500 font-bold">{w.subtitle}</div>
-                  </td>
-                  {participants.map((p) => {
-                    const wVote = weekendVotes.find(
-                      (v) => v.weekendId === w.id && v.participantId === p.id
-                    );
-                    const status = wVote?.status;
-                    const isMe = currentParticipant?.id === p.id;
-
-                    return (
-                      <td
-                        key={p.id}
-                        onClick={() => isMe && handleWeekendClick(w.id)}
-                        className={`p-2 text-center ${isMe ? 'cursor-pointer hover:bg-emerald-100/80' : ''}`}
-                      >
-                        {status === 'available' && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-950 border border-emerald-300 rounded-full font-black text-[11px]">
-                            <Check className="w-3.5 h-3.5 text-emerald-600" /> Dispo
-                          </span>
-                        )}
-                        {status === 'unavailable' && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-100 text-rose-900 border border-rose-300 rounded-full font-black text-[11px]">
-                            <X className="w-3.5 h-3.5 text-rose-600" /> Pas dispo
-                          </span>
-                        )}
-                        {!status && (
-                          <span className="text-slate-300 italic text-[10px]">—</span>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-
-              <tr className="bg-emerald-50/80 text-emerald-900 font-black uppercase tracking-wider text-[10px] border-y-2 border-emerald-200">
-                <td colSpan={participants.length + 1} className="p-2.5 px-3">
-                  📅 Détail Jour par Jour (Clique sur ta colonne pour modifier ta dispo)
-                </td>
-              </tr>
+              {/* Day by Day rows */}
 
               {allDays.map((d) => {
                 return (
