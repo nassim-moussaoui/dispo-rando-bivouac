@@ -6,6 +6,7 @@ import {
   doc, 
   setDoc, 
   deleteDoc,
+  getDocs,
   onSnapshot
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -51,18 +52,44 @@ export const saveParticipantInDb = async (participant: Participant) => {
 export const deleteParticipantFromDb = async (participantId: string) => {
   try {
     await initAuth();
+    // Direct delete by ID
     const ref = doc(db, COLLECTIONS.PARTICIPANTS, participantId);
     await deleteDoc(ref);
+
+    // Deep delete scan by ID and data.id
+    const colRef = collection(db, COLLECTIONS.PARTICIPANTS);
+    const snap = await getDocs(colRef);
+    const promises: Promise<void>[] = [];
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (docSnap.id === participantId || data.id === participantId) {
+        promises.push(deleteDoc(doc(db, COLLECTIONS.PARTICIPANTS, docSnap.id)));
+      }
+    });
+    await Promise.all(promises);
   } catch (err) {
     console.error("Error deleting participant from Firestore:", err);
   }
 };
 
-export const deleteDocByIdInDb = async (collectionName: string, docId: string) => {
+export const deleteDocByIdInDb = async (collectionName: string, docId: string, participantId?: string) => {
   try {
     await initAuth();
     const ref = doc(db, collectionName, docId);
     await deleteDoc(ref);
+
+    if (participantId) {
+      const colRef = collection(db, collectionName);
+      const snap = await getDocs(colRef);
+      const promises: Promise<void>[] = [];
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (docSnap.id === docId || data.participantId === participantId || data.id === docId) {
+          promises.push(deleteDoc(doc(db, collectionName, docSnap.id)));
+        }
+      });
+      await Promise.all(promises);
+    }
   } catch (err) {
     console.warn(`Error deleting doc ${docId} from ${collectionName}:`, err);
   }

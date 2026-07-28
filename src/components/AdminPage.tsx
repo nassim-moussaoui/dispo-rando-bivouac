@@ -370,11 +370,24 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               </button>
 
                               <button
-                                onClick={() => setConfirmDeleteParticipant(p)}
+                                onClick={async () => {
+                                  if (window.confirm(`Voulez-vous vraiment supprimer définitivement "${p.name}" et tous ses votes ?`)) {
+                                    setDeletingId(p.id);
+                                    try {
+                                      await onDeleteParticipant(p.id);
+                                      setToastMessage(`Le membre "${p.name}" a été supprimé avec succès.`);
+                                    } catch (err) {
+                                      console.error("Erreur lors de la suppression:", err);
+                                    } finally {
+                                      setDeletingId(null);
+                                    }
+                                  }
+                                }}
+                                disabled={deletingId === p.id}
                                 className="px-3.5 py-1.5 bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
-                                <span>Supprimer</span>
+                                <span>{deletingId === p.id ? 'Suppression...' : 'Supprimer'}</span>
                               </button>
                             </td>
                           </tr>

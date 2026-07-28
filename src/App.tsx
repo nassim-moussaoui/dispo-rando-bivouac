@@ -217,14 +217,14 @@ export default function App() {
     }
 
     try {
-      // 2. Perform Firestore document deletions in background
+      // 2. Perform deep Firestore document deletions
       await deleteParticipantFromDb(participantId);
       
       const pVotes = weekendVotes.filter((v) => v.participantId === participantId);
-      const voteDeletions = pVotes.map((v) => deleteDocByIdInDb('weekendVotes', v.id));
+      const voteDeletions = pVotes.map((v) => deleteDocByIdInDb('weekendVotes', v.id, participantId));
 
       const pAvails = dateAvailabilities.filter((a) => a.participantId === participantId);
-      const availDeletions = pAvails.map((a) => deleteDocByIdInDb('availabilities', a.id));
+      const availDeletions = pAvails.map((a) => deleteDocByIdInDb('availabilities', a.id, participantId));
 
       await Promise.all([...voteDeletions, ...availDeletions]);
     } catch (err) {
