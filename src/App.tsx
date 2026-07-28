@@ -63,41 +63,30 @@ export default function App() {
   // Initialize Firebase Auth & Load stored local participant or URL user magic link
   useEffect(() => {
     const setup = async () => {
-      const uid = await initAuth();
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlUserId = urlParams.get('user') || urlParams.get('u');
-
-      if (urlUserId) {
-        // Recover profile from URL parameter
-        const found = participants.find((p) => p.id === urlUserId);
-        if (found) {
-          setCurrentParticipant(found);
-          localStorage.setItem('dispo_rando_participant', JSON.stringify(found));
-          window.history.replaceState({}, '', window.location.pathname);
-          return;
-        }
-      }
+      await initAuth();
 
       const stored = localStorage.getItem('dispo_rando_participant');
       if (stored) {
         try {
           const parsed = JSON.parse(stored) as Participant;
-          const participantData = {
-            ...parsed,
-            id: uid || parsed.id || 'p_' + Date.now(),
-          };
-          setCurrentParticipant(participantData);
+          setCurrentParticipant(parsed);
         } catch (e) {
           console.error("Failed parsing stored participant:", e);
+          localStorage.removeItem('dispo_rando_participant');
+          setIsUserModalOpen(true);
         }
       } else {
         setIsUserModalOpen(true);
       }
     };
     setup();
+  }, []);
 
+  // Subscribe to Firestore collections (runs once)
+  useEffect(() => {
     const unsubParticipants = subscribeParticipants((list) => {
       setParticipants(list);
+
       // Auto-clear local participant if deleted from database
       const stored = localStorage.getItem('dispo_rando_participant');
       if (stored) {
@@ -125,18 +114,37 @@ export default function App() {
       setTripDetails(details);
     });
 
+    // Handle magic link ?user= recovery
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlUserId = urlParams.get('user') || urlParams.get('u');
+    if (urlUserId) {
+      // We'll check once participants load via the subscription above
+      const unsubMagicLink = subscribeParticipants((list) => {
+        const found = list.find((p) => p.id === urlUserId);
+        if (found) {
+          setCurrentParticipant(found);
+          localStorage.setItem('dispo_rando_participant', JSON.stringify(found));
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+        unsubMagicLink();
+      });
+    }
+
     return () => {
       unsubParticipants();
       unsubWeekendVotes();
       unsubAvailabilities();
       unsubTripDetails();
     };
-  }, [participants]);
+  }, []);
 
   const handleSelectExistingParticipant = (participant: Participant) => {
     setCurrentParticipant(participant);
     localStorage.setItem('dispo_rando_participant', JSON.stringify(participant));
-    saveParticipantInDb(participant);
+    // Update pinHash/pinResetRequired if changed during reconnection
+    if (participant.pinHash !== undefined) {
+      saveParticipantInDb(participant);
+    }
   };
 
   const handleSaveParticipant = async (
