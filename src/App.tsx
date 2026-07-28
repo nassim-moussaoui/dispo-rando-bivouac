@@ -28,6 +28,7 @@ import { DetailedCalendar } from './components/DetailedCalendar';
 import { TripDetailsTab } from './components/TripDetailsTab';
 import { ShareModal } from './components/ShareModal';
 import { AdminPage } from './components/AdminPage';
+import { NotFoundPage } from './components/NotFoundPage';
 
 import { Calendar, Compass, Tent } from 'lucide-react';
 
@@ -200,8 +201,10 @@ export default function App() {
     await saveTripDetailsInDb(details);
   };
 
-  // If path is /admin, render the full AdminPage
-  if (currentPath === '/admin' || currentPath.startsWith('/admin')) {
+  const cleanPath = currentPath.toLowerCase().replace(/\/$/, '') || '/';
+
+  // Admin route
+  if (cleanPath === '/admin' || cleanPath.startsWith('/admin/')) {
     return (
       <AdminPage
         participants={participants}
@@ -211,6 +214,11 @@ export default function App() {
         onNavigateHome={() => navigateTo('/')}
       />
     );
+  }
+
+  // 404 route for unknown paths
+  if (cleanPath !== '/' && cleanPath !== '/index.html') {
+    return <NotFoundPage onNavigateHome={() => navigateTo('/')} />;
   }
 
   return (
