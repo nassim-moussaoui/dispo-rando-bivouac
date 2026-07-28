@@ -14,6 +14,7 @@ import {
   subscribeTripDetails, 
   saveParticipantInDb, 
   deleteParticipantFromDb,
+  deleteDocByIdInDb,
   resetParticipantPinInDb,
   saveWeekendVoteInDb, 
   deleteWeekendVoteInDb,
@@ -205,23 +206,27 @@ export default function App() {
 
   // Admin participant deletion
   const handleDeleteParticipant = async (participantId: string) => {
-    await deleteParticipantFromDb(participantId);
-    
-    // Purge associated votes from Firestore
-    const pVotes = weekendVotes.filter((v) => v.participantId === participantId);
-    for (const v of pVotes) {
-      await deleteWeekendVoteInDb(participantId, v.weekendId);
-    }
+    try {
+      // Delete main participant document
+      await deleteParticipantFromDb(participantId);
+      
+      // Delete all associated weekend votes and date availabilities in parallel
+      const pVotes = weekendVotes.filter((v) => v.participantId === participantId);
+      const voteDeletions = pVotes.map((v) => deleteDocByIdInDb('weekendVotes', v.id));
 
-    const pAvails = dateAvailabilities.filter((a) => a.participantId === participantId);
-    for (const a of pAvails) {
-      await deleteDateAvailabilityInDb(participantId, a.date);
-    }
+      const pAvails = dateAvailabilities.filter((a) => a.participantId === participantId);
+      const availDeletions = pAvails.map((a) => deleteDocByIdInDb('availabilities', a.id));
 
-    // Reset local current participant if it's the deleted user
-    if (currentParticipant?.id === participantId) {
-      setCurrentParticipant(null);
-      localStorage.removeItem('dispo_rando_participant');
+      await Promise.all([...voteDeletions, ...availDeletions]);
+
+      // Reset local current participant if it's the deleted user
+      if (currentParticipant?.id === participantId) {
+        setCurrentParticipant(null);
+        localStorage.removeItem('dispo_rando_participant');
+      }
+    } catch (err) {
+      console.error("Error in handleDeleteParticipant:", err);
+      throw err;
     }
   };
 

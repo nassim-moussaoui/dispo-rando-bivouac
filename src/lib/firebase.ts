@@ -53,6 +53,15 @@ export const deleteParticipantFromDb = async (participantId: string) => {
   await deleteDoc(ref);
 };
 
+export const deleteDocByIdInDb = async (collectionName: string, docId: string) => {
+  try {
+    const ref = doc(db, collectionName, docId);
+    await deleteDoc(ref);
+  } catch (err) {
+    console.warn(`Error deleting doc ${docId} from ${collectionName}:`, err);
+  }
+};
+
 export const resetParticipantPinInDb = async (participantId: string) => {
   const ref = doc(db, COLLECTIONS.PARTICIPANTS, participantId);
   await setDoc(ref, {
