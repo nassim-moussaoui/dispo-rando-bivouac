@@ -6,7 +6,6 @@ interface HeaderProps {
   currentParticipant: Participant | null;
   onOpenUserModal: () => void;
   onOpenShareModal: () => void;
-  onOpenAdminModal: () => void;
   participantCount: number;
 }
 
@@ -14,7 +13,6 @@ export const Header: React.FC<HeaderProps> = ({
   currentParticipant,
   onOpenUserModal,
   onOpenShareModal,
-  onOpenAdminModal,
   participantCount,
 }) => {
   const [copied, setCopied] = useState(false);
@@ -80,15 +78,6 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
               <span><strong>{participantCount}</strong> inscrit{participantCount > 1 ? 's' : ''}</span>
             </div>
-
-            {/* Admin Access Button */}
-            <button
-              onClick={onOpenAdminModal}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black rounded-xl border border-slate-300 transition cursor-pointer"
-              title="Accès Administrateur"
-            >
-              <span>Admin 🔒</span>
-            </button>
           </div>
 
         </div>

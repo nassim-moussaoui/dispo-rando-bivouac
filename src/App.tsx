@@ -27,11 +27,12 @@ import { HeatmapRanking } from './components/HeatmapRanking';
 import { DetailedCalendar } from './components/DetailedCalendar';
 import { TripDetailsTab } from './components/TripDetailsTab';
 import { ShareModal } from './components/ShareModal';
-import { AdminModal } from './components/AdminModal';
+import { AdminPage } from './components/AdminPage';
 
-import { Calendar, Compass, Users, Tent } from 'lucide-react';
+import { Calendar, Compass, Tent } from 'lucide-react';
 
 export default function App() {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [currentParticipant, setCurrentParticipant] = useState<Participant | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [weekendVotes, setWeekendVotes] = useState<WeekendVote[]>([]);
@@ -41,7 +42,20 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'calendar' | 'trip'>('calendar');
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+
+  // Router listener
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = (path: string) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+  };
 
   // Initialize Firebase Auth & Load stored local participant
   useEffect(() => {
@@ -65,10 +79,7 @@ export default function App() {
       }
     };
     setup();
-  }, []);
 
-  // Real-time subscriptions to Firestore
-  useEffect(() => {
     const unsubParticipants = subscribeParticipants((list) => {
       setParticipants(list);
     });
@@ -93,7 +104,6 @@ export default function App() {
     };
   }, []);
 
-  // Handler to create/update current participant
   const handleSaveParticipant = async (
     name: string,
     emoji: string,
@@ -190,6 +200,19 @@ export default function App() {
     await saveTripDetailsInDb(details);
   };
 
+  // If path is /admin, render the full AdminPage
+  if (currentPath === '/admin' || currentPath.startsWith('/admin')) {
+    return (
+      <AdminPage
+        participants={participants}
+        weekendVotes={weekendVotes}
+        dateAvailabilities={dateAvailabilities}
+        onDeleteParticipant={handleDeleteParticipant}
+        onNavigateHome={() => navigateTo('/')}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-emerald-50 text-slate-900 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
       
@@ -198,7 +221,6 @@ export default function App() {
         currentParticipant={currentParticipant}
         onOpenUserModal={() => setIsUserModalOpen(true)}
         onOpenShareModal={() => setIsShareModalOpen(true)}
-        onOpenAdminModal={() => setIsAdminModalOpen(true)}
         participantCount={participants.length}
       />
 
@@ -296,16 +318,6 @@ export default function App() {
         participantCount={participants.length}
       />
 
-      <AdminModal
-        isOpen={isAdminModalOpen}
-        onClose={() => setIsAdminModalOpen(false)}
-        participants={participants}
-        weekendVotes={weekendVotes}
-        dateAvailabilities={dateAvailabilities}
-        onDeleteParticipant={handleDeleteParticipant}
-      />
-
     </div>
   );
 }
-
